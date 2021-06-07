@@ -53,5 +53,6 @@ RUN echo "Getting mongodb mongosh" && \
     dpkg -i /tmp/mongo_shell.deb && \
     rm /tmp/mongo_shell.deb
 
+WORKDIR /root
 
-
+RUN curl -sSL http://bit.ly/slavkodotfiles > bootstrap.sh && chmod +x bootstrap.sh && ./bootstrap.sh docker
