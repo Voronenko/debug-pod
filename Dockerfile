@@ -19,7 +19,7 @@ ENV LOCAL_PORT=$DEF_LOCAL_PORT
 
 RUN echo "Installing base packages" && \
     apt update -yq && \
-    apt install -yq socat dnsutils curl telnet clickhouse-client iputils-ping jq less
+    apt install -yq gcc socat dnsutils curl telnet iputils-ping jq less traceroute wget lsb-release
 
 RUN pip install httpie http-prompt
 
@@ -33,6 +33,10 @@ RUN echo "Workaround on mongo tools deps" && \
     apt install -uq libssl1.0.0 && \
     rm /etc/apt/sources.list.d/libssl100.list && \
     apt update -yq
+
+RUN echo "Installing clickhouse community cli" && \
+    apt install -yq clickhouse-client && \
+    pip3 install clickhouse-cli
 
 # https://www.mongodb.com/try/download/community
 RUN echo "Getting mongo binary" && \
@@ -52,6 +56,16 @@ RUN echo "Getting mongodb mongosh" && \
     dpkg-reconfigure debconf -f noninteractive -p critical && \
     dpkg -i /tmp/mongo_shell.deb && \
     rm /tmp/mongo_shell.deb
+
+RUN echo "Installing postgres 13 client tools" && \
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -  && \
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list && \
+    apt update && \
+    apt install -yq postgresql-client-13 postgresql-server-dev-all python3-psycopg2 && \
+    pip3 install -U pgcli
+
+RUN echo "Installing mariadb client tools" && \
+    apt install -yq mariadb-client 
 
 WORKDIR /root
 
