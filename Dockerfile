@@ -19,7 +19,7 @@ ENV LOCAL_PORT=$DEF_LOCAL_PORT
 
 RUN echo "Installing base packages" && \
     apt update -yq && \
-    apt install -yq gcc socat dnsutils curl telnet iputils-ping jq less traceroute wget lsb-release
+    apt install -yq gcc socat dnsutils curl telnet iputils-ping jq less traceroute wget lsb-release unzip
 
 RUN pip install httpie http-prompt
 
@@ -57,15 +57,25 @@ RUN echo "Getting mongodb mongosh" && \
     dpkg -i /tmp/mongo_shell.deb && \
     rm /tmp/mongo_shell.deb
 
-RUN echo "Installing postgres 13 client tools" && \
+RUN echo "Installing postgres 15 client tools" && \
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -  && \
     echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list && \
     apt update && \
-    apt install -yq postgresql-client-13 postgresql-server-dev-all python3-psycopg2 && \
+    apt install -yq postgresql-client-15 postgresql-server-dev-all python3-psycopg2 && \
     pip3 install -U pgcli
 
 RUN echo "Installing mariadb client tools" && \
     apt install -yq mariadb-client 
+
+# Download and install AWS CLI version 2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+  && unzip awscliv2.zip \
+  && ./aws/install \
+  && rm -rf awscliv2.zip ./aws
+
+# Verify the installation
+RUN aws --version
+
 
 WORKDIR /root
 
